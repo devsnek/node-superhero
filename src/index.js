@@ -38,8 +38,8 @@ class Superhero {
   }
 
   _requestListener (req, res) {
-    if (!this.options.cdn) req = new Request(this, req);
-    const response = new Response(this, res);
+    req = new Request(this, req);
+    res = new Response(this, res);
 
     const handlers = this.handlers[req.method.toLowerCase()];
     const failed = [];
@@ -47,12 +47,12 @@ class Superhero {
       const match = matchURL(handlers[handler].path, req);
       if (match) {
         req.params = match;
-        handlers[handler].handler(req, response);
+        handlers[handler].handler(req, res);
       } else {
         failed.push(match);
       }
       if (failed.length === Object.keys(handlers).length) {
-        return response.send(404);
+        return res.send(404);
       }
     }
   }

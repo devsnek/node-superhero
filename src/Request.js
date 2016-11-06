@@ -5,11 +5,13 @@ module.exports = class Request {
     this.server = server;
     this.req = req;
     this.body = [];
-    req.on('data', chunk => {
-      this.body.push(chunk);
-    }).on('end', () => {
-      this.body = Buffer.concat(this.body).toString();
-    });
+    if (!server.options.cdn) {
+      req.on('data', chunk => {
+        this.body.push(chunk);
+      }).on('end', () => {
+        this.body = Buffer.concat(this.body).toString();
+      });
+    }
     this.status = req.statusCode;
     this.headers = req.headers;
     this.rawHeaders = req.rawHeaders;
