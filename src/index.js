@@ -11,24 +11,16 @@ class Superhero {
 
     this.server = http.createServer(this._requestListener.bind(this));
 
-    if (options.cdn) {
-      this.handlers.get = {};
-      this.get = (path, handler) => {
+    this.methods = options.cdn ? ['get', 'post'] : ['get', 'put', 'post', 'del', 'patch', 'head', 'delete'];
+
+    for (const method of this.methods) {
+      this[method] = (path, handler) => {
         path = compileURL({ url: path });
-        if (!this.handlers['get'][path]) this.handlers['get'][path] = {};
-        this.handlers['get'][path] = { path, handler };
-      }
-    } else {
-      const methods = ['get', 'put', 'post', 'del', 'patch', 'head', 'delete'];
-      for (const method of methods) {
-        this[method] = (path, handler) => {
-          path = compileURL({ url: path });
-          const m = (method === 'delete' ? 'del' : method);
-          if (!this.handlers[m]) this.handlers[m] = {};
-          if (!this.handlers[m][path]) this.handlers[m][path] = {};
-          this.handlers[m][path] = { path, handler };
-        };
-      }
+        const m = (method === 'delete' ? 'del' : method);
+        if (!this.handlers[m]) this.handlers[m] = {};
+        if (!this.handlers[m][path]) this.handlers[m][path] = {};
+        this.handlers[m][path] = { path, handler };
+      };
     }
   }
 
