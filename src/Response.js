@@ -93,8 +93,6 @@ class Response {
       return this.res.end();
     }
 
-    let writable = true;
-
     const raw = new stream.Readable();
     raw.push(new Buffer(data));
     raw.push(null);
@@ -102,13 +100,11 @@ class Response {
     this.res.writeHead(this.status, this.headers);
 
     writeStream.on('data', chunk => {
-      if (writable !== true) return;
       if (this.res.finished) return;
       if (this.res.write(chunk) === false) writeStream.pause();
     });
 
     writeStream.on('end', () => {
-      writable = false;
       this.res.end();
     });
 
