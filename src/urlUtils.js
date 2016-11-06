@@ -1,7 +1,7 @@
 const url = require('url');
 
 module.exports.matchURL = function matchURL (re, req) {
-  const result = re.exec(req.url.split('?')[0]);
+  const result = re.exec((typeof req.url === 'string' ? req.url : req.url.pathname).split('?')[0]);
   const params = {};
   if (!result) return false;
 
