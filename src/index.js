@@ -24,9 +24,9 @@ class Superhero {
     }
   }
 
-  listen (port) {
-    this.port = port;
-    return this.server.listen(port);
+  listen (...args) {
+    this.server.listen(...args);
+    this.port = args[0];
   }
 
   _requestListener (req, res) {
