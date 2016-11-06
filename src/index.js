@@ -31,7 +31,7 @@ class Superhero {
 
   _requestListener (req, res) {
     req = new Request(this, req);
-    res = new Response(this, res);
+    res = new Response(this, req, res);
 
     const handlers = this.handlers[req.method.toLowerCase()];
     const failed = [];

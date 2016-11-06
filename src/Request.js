@@ -1,4 +1,5 @@
 const url = require('url');
+const zlib = require('zlib');
 
 module.exports = class Request {
   constructor (server, req) {
@@ -9,7 +10,19 @@ module.exports = class Request {
       req.on('data', chunk => {
         this.body.push(chunk);
       }).on('end', () => {
-        this.body = Buffer.concat(this.body).toString();
+        let buffer = Buffer.concat(this.body);
+        if (req.headers.encoding === 'gzip') {
+          zlib.gunzip(buffer, (err, decoded) => {
+            if (err) return;
+            this.body = decoded && decoded.toString();
+          });
+        } else if (req.headers.encoding === 'deflate') {
+          zlib.inflate(buffer, (err, decoded) => {
+            if (err) return;
+            this.body = decoded && decoded.toString();
+          });
+        }
+        // this.body = Buffer.concat(this.body).toString();
       });
     }
     this.status = req.statusCode;
