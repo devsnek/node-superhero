@@ -53,7 +53,7 @@ class Response {
       this.headers.location = code;
     } else {
       this.headers.location = location;
-      this.code = code;
+      this.status = code;
     }
     this._send();
   }
@@ -64,7 +64,7 @@ class Response {
 
   _send (data) {
     if (!data) {
-      this.res.writeHead(this.code, this.headers);
+      this.res.writeHead(this.status, this.headers);
       return this.res.end();
     }
     if (typeof data !== 'string') data = JSON.stringify(data);
@@ -83,13 +83,14 @@ class Response {
     } else {
       this.res.writeHead(this.status, this.headers);
       this.res.write(data);
-      this.res.end();
-      return;
+      return this.res.end();
     }
 
     const raw = new stream.Readable();
     raw.push(new Buffer(data));
     raw.push(null);
+
+    this.res.writeHead(this.status, this.headers);
 
     let writable = true;
 
@@ -111,8 +112,6 @@ class Response {
     });
 
     raw.pipe(writeStream);
-
-    this.res.writeHead(this.status, this.headers);
   }
 }
 
