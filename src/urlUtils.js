@@ -1,3 +1,8 @@
+/*
+  Stolen from Restify
+  Modified by Gus Caplan
+*/
+
 const url = require('url');
 
 module.exports.matchURL = function matchURL (re, req) {
