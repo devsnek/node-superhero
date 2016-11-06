@@ -5,6 +5,10 @@ const server = new Superhero();
 
 const router = new Router();
 
+server.use((req, res) => {
+  console.log(req.path);
+});
+
 router.get('/:x', (req, res) => {
   res.send('ROOT! ' + req.params.x);
 });
