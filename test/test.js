@@ -13,10 +13,10 @@ router.get('/params/:x', (req, res) => {
   res.send(req.params.x);
 });
 
-// router.post('/post', (req, res) => {
-//   console.log(req.body);
-//   res.send('HI');
-// });
+router.post('/post', (req, res) => {
+  console.log(req.body);
+  res.send({'OMG': 'HELP'});
+});
 
 router.applyRoutes(server);
 

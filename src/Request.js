@@ -6,6 +6,12 @@ module.exports = class Request {
     this.server = server;
     this.req = req;
     this.body = [];
+    this._finished = () => {
+      try {
+        this.body = JSON.parse(this.body);
+        finished();
+      } catch (err) {};
+    }
     req.on('data', chunk => {
       this.body.push(chunk);
     }).on('end', () => {
@@ -14,17 +20,17 @@ module.exports = class Request {
         zlib.gunzip(buffer, (err, decoded) => {
           if (err) return;
           this.body = decoded && decoded.toString();
-          finished();
+          this._finished();
         });
       } else if (req.headers.encoding === 'deflate') {
         zlib.inflate(buffer, (err, decoded) => {
           if (err) return;
           this.body = decoded && decoded.toString();
-          finished();
+          this._finished();
         });
       } else {
         this.body = buffer.toString();
-        finished();
+        this._finished();
       }
     });
     this.status = req.statusCode;

@@ -43,7 +43,7 @@ class Superhero {
           failed.push(match);
         }
         if (failed.length === Object.keys(handlers).length) {
-          return res.send(400);
+          return res.send(404);
         }
       }
     });

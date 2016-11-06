@@ -28,12 +28,20 @@ class Response {
   send (status, data) {
     if (data) {
       this.status = status;
+      if (typeof data !== 'string') {
+        data = JSON.stringify(data);
+        this.headers['Content-Type'] = 'application/json';
+      }
       this._send(data)
     } else {
       if (typeof status === 'number') {
         this.status = status;
         this._send();
       } else {
+        if (typeof status !== 'string') {
+          status = JSON.stringify(status);
+          this.headers['Content-Type'] = 'application/json';
+        }
         this._send(status);
       }
     }
@@ -67,7 +75,6 @@ class Response {
       this.res.writeHead(this.status, this.headers);
       return this.res.end();
     }
-    if (typeof data !== 'string') data = JSON.stringify(data);
 
     let acceptEncoding = this.req.headers['accept-encoding'];
     if (!acceptEncoding) acceptEncoding = '';
