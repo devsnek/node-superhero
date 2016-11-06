@@ -95,13 +95,18 @@ class Response {
 
     raw.pipe(writeStream);
 
+    let writable;
+
     writeStream.on('data', chunk => {
-      if (this.res.write(chunk) === false) {
-        writeStream.pause();
+      if (writable) {
+        if (this.res.write(chunk) === false) {
+          writeStream.pause();
+        }
       }
     });
 
     writeStream.on('end', () => {
+      writable = false;
       this.res.end();
     });
 
