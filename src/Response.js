@@ -91,11 +91,7 @@ class Response {
     raw.push(new Buffer(data));
     raw.push(null);
 
-    this.res.writeHead(this.status, this.headers);
-
-    raw.pipe(writeStream);
-
-    let writable;
+    let writable = true;
 
     writeStream.on('data', chunk => {
       if (writable) {
@@ -113,6 +109,10 @@ class Response {
     this.res.on('drain', () => {
       writeStream.resume();
     });
+
+    raw.pipe(writeStream);
+
+    this.res.writeHead(this.status, this.headers);
   }
 }
 
