@@ -21,8 +21,9 @@ module.exports = class Request {
             if (err) return;
             this.body = decoded && decoded.toString();
           });
+        } else {
+          this.body = buffer.toString();
         }
-        // this.body = Buffer.concat(this.body).toString();
       });
     }
     this.status = req.statusCode;
