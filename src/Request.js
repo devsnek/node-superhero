@@ -18,6 +18,6 @@ module.exports = class Request {
     this.method = req.method;
     this.url = url.parse(req.url, true);
     this.path = this.url.href;
-    this.query = this.path.query;
+    this.query = this.url.query;
   }
 }
