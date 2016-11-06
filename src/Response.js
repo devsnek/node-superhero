@@ -72,6 +72,7 @@ class Response {
 
   _send (data) {
     if (!data) {
+      this.headers['Content-Encoding'] = 'identify';
       this.res.writeHead(this.status, this.headers);
       return this.res.end();
     }
@@ -88,6 +89,7 @@ class Response {
       writeStream = zlib.createGzip();
       this.headers['Content-Encoding'] = 'gzip';
     } else {
+      this.headers['Content-Encoding'] = 'identify';
       this.res.writeHead(this.status, this.headers);
       this.res.write(data);
       return this.res.end();

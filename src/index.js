@@ -40,6 +40,7 @@ class Superhero {
         req = new Request(this, req, res, match, handlers[handler].opts, () => {
           handlers[handler].handler(req, res);
         });
+        return;
       } else {
         failed.push(match);
       }
