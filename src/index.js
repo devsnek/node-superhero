@@ -45,7 +45,7 @@ class Superhero {
         failed.push(match);
       }
       if (failed.length === Object.keys(handlers).length) {
-        return res.send(404);
+        return res.send(404, `Cannot GET ${req.url}`);
       }
     }
   }
