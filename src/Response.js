@@ -103,7 +103,7 @@ class Response {
 
     writeStream.on('data', chunk => {
       if (writable !== true) return;
-      if (writeStream.finished) return;
+      if (this.res.finished) return;
       if (this.res.write(chunk) === false) writeStream.pause();
     });
 
