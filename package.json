@@ -1,0 +1,14 @@
+{
+  "name": "superhero",
+  "version": "1.0.0",
+  "description": "The fastest http wrapper",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "author": "Gus Caplan <me@gus.host>",
+  "license": "MIT",
+  "dependencies": {
+    "mime": "^1.3.4"
+  }
+}
