@@ -102,11 +102,9 @@ class Response {
     this.res.writeHead(this.status, this.headers);
 
     writeStream.on('data', chunk => {
-      if (writable && !writeStream._writableState.ended) {
-        if (this.res.write(chunk) === false) {
-          writeStream.pause();
-        }
-      }
+      if (writable !== true) return;
+      if (writeStream._writableState.ended) return;
+      if (this.res.write(chunk) === false) writeStream.pause();
     });
 
     writeStream.on('end', () => {
