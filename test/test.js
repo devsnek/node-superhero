@@ -10,8 +10,10 @@ router.get('/', (req, res) => {
 });
 
 router.get('/params/:x', (req, res) => {
+  console.log('PARAMS', req.params);
+  console.log('BODY', req.body);
   res.send(req.params.x);
-});
+}, { body: true });
 
 router.post('/post', (req, res) => {
   console.log(req.body);

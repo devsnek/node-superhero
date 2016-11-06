@@ -14,12 +14,13 @@ class Superhero {
     this.methods = ['get', 'put', 'post', 'del', 'patch', 'head', 'delete'];
 
     for (const method of this.methods) {
-      this[method] = (path, handler) => {
+      this[method] = (path, handler, opts = {}) => {
         path = compileURL({ url: path });
         const m = (method === 'delete' ? 'del' : method);
+        if (['put', 'delete', 'post'].includes(m)) opts.body = true;
         if (!this.handlers[m]) this.handlers[m] = {};
         if (!this.handlers[m][path]) this.handlers[m][path] = {};
-        this.handlers[m][path] = { path, handler };
+        this.handlers[m][path] = { path, handler, opts };
       };
     }
   }
@@ -31,22 +32,21 @@ class Superhero {
 
   _requestListener (req, res) {
     res = new Response(this, req, res);
-    req = new Request(this, req, () => {
-      const handlers = this.handlers[req.method.toLowerCase()];
-      const failed = [];
-      for (const handler in handlers) {
-        const match = matchURL(handlers[handler].path, req);
-        if (match) {
-          req.params = match;
+    const handlers = this.handlers[req.method.toLowerCase()];
+    const failed = [];
+    for (const handler in handlers) {
+      const match = matchURL(handlers[handler].path, req);
+      if (match) {
+        req = new Request(this, req, res, match, handlers[handler].opts, () => {
           handlers[handler].handler(req, res);
-        } else {
-          failed.push(match);
-        }
-        if (failed.length === Object.keys(handlers).length) {
-          return res.send(404);
-        }
+        });
+      } else {
+        failed.push(match);
       }
-    });
+      if (failed.length === Object.keys(handlers).length) {
+        return res.send(404);
+      }
+    }
   }
 }
 

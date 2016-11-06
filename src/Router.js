@@ -3,11 +3,11 @@ class Router {
     this.handlers = {};
     this.methods = ['get', 'put', 'post', 'del', 'patch', 'head', 'delete'];
     for (const method of this.methods) {
-      this[method] = (path, handler) => {
+      this[method] = (path, handler, opts = {}) => {
         const m = (method === 'delete' ? 'del' : method);
         if (!this.handlers[m]) this.handlers[m] = {};
         if (!this.handlers[m][path]) this.handlers[m][path] = {};
-        this.handlers[m][path] = { path, handler };
+        this.handlers[m][path] = { path, handler, opts: opts };
       };
     }
   }
@@ -24,7 +24,7 @@ class Router {
     for (const group in this.handlers) {
       const handlers = this.handlers[group];
       for (const handler in handlers) {
-        server[group](handlers[handler].path, handlers[handler].handler);
+        server[group](handlers[handler].path, handlers[handler].handler, handlers[handler].opts);
       }
     }
   }
