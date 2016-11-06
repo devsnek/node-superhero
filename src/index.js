@@ -7,6 +7,7 @@ class Superhero {
   constructor (options = {}) {
     this.options = {};
     this.handlers = {};
+    this.headers = options.headers || {};
     this.name = options.name;
 
     this.server = http.createServer(this._requestListener.bind(this));
@@ -37,6 +38,9 @@ class Superhero {
     for (const handler in handlers) {
       const match = matchURL(handlers[handler].path, req);
       if (match) {
+        for (const header in this.headers) {
+          res.header(header, this.headers[header]);
+        }
         req = new Request(this, req, res, match, handlers[handler].opts, () => {
           handlers[handler].handler(req, res);
         });
@@ -48,6 +52,10 @@ class Superhero {
         return res.send(404, `Cannot ${req.method} ${req.url}`);
       }
     }
+  }
+
+  defaultHeader (name, value) {
+    this.headers[name] = value;
   }
 }
 
