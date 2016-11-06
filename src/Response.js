@@ -48,13 +48,23 @@ class Response {
     });
   }
 
+  redirect (code = 302, location) {
+    if (!location || typeof code !== 'number') {
+      this.headers.location = code;
+    } else {
+      this.headers.location = location;
+      this.code = code;
+    }
+    this._send();
+  }
+
   end (data) {
     this._send(data);
   }
 
   _send (data) {
     if (!data) {
-      this.res.writeHead(200, this.headers);
+      this.res.writeHead(this.code, this.headers);
       return this.res.end();
     }
     if (typeof data !== 'string') data = JSON.stringify(data);
