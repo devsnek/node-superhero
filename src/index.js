@@ -1,70 +1,86 @@
-const http = require('http');
-const Request = require('./Request');
-const Response = require('./Response');
-const { compileURL, matchURL } = require('./urlUtils');
+// Copyright Gus Caplan 2016
 
+const { compileURL, matchURL } = require('./urlUtils.js');
+
+// Supported HTTP verbs
+const HTTPVerbs = ['delete', 'get', 'head', 'post', 'put'];
+
+/**
+ * Apply each series.
+ * @param {function[]} fns
+ * @param {...*} args Arguments to call with each function, the last arg is the
+ * end callback.
+ */
+function applyEachSeries (fns, ...args) {
+  const iterator = fns[Symbol.iterator]();
+  const final = args[args.length - 1];
+  (function cb () {
+    const x = iterator.next();
+    if (x.done) return final();
+    x.value(...args.slice(0, args.length - 1), cb);
+  })();
+}
+
+/**
+ * HTTP request router for Node.js.
+ */
 class Superhero {
-  constructor (options = {}) {
-    this.options = {};
+  constructor () {
     this.handlers = {};
-    this.headers = options.headers || {};
-    this.useables = [];
-    this.name = options.name;
-
-    this.server = http.createServer(this._requestListener.bind(this));
-
-    this.methods = ['get', 'put', 'post', 'del', 'patch', 'head', 'delete'];
-
-    for (const method of this.methods) {
-      this[method] = (path, handler, opts = {}) => {
-        path = compileURL({ url: path });
-        const m = (method === 'delete' ? 'del' : method);
-        if (['put', 'delete', 'post'].includes(m)) opts.body = true;
-        if (!this.handlers[m]) this.handlers[m] = {};
-        if (!this.handlers[m][path]) this.handlers[m][path] = {};
-        this.handlers[m][path] = { path, handler, opts };
-      };
-    }
+    this.middleware = [];
   }
 
-  listen (...args) {
-    this.server.listen(...args);
-    this.port = args[0];
-  }
-
+  /**
+   * Request listener
+   */
   _requestListener (req, res) {
-    res = new Response(this, req, res);
+    res.setHeader('Content-Type', 'application/json');
     const handlers = this.handlers[req.method.toLowerCase()];
-    const failed = [];
-    for (const handler in handlers) {
-      const match = matchURL(handlers[handler].path, req);
-      if (match) {
-        for (const header in this.headers) {
-          res.header(header, this.headers[header]);
-        }
-        req = new Request(this, req, res, match, handlers[handler].opts, () => {
-          for (const useable of this.useables) useable(req, res);
+
+    res._end = res.end;
+    res.end = (code, body) => {
+      if (res._headersSent || res.finished) return;
+      res.writeHead(code, {
+        'Content-Length': Buffer.byteLength(body, 'utf8')
+      });
+      res._end(body);
+    };
+
+    applyEachSeries(this.middleware, req, res, () => {
+      let matched = false;
+      for (const handler in handlers) {
+        if (matchURL(handlers[handler].path, req)) {
           handlers[handler].handler(req, res);
-        });
-        return;
-      } else {
-        failed.push(match);
+          matched = true;
+          return;
+        }
       }
-      if (failed.length === Object.keys(handlers).length) {
-        return res.send(404, `Cannot ${req.method} ${req.url}`);
+
+      if (!matched) {
+        return res.end(404, JSON.stringify({
+          success: false,
+          errorcode: 404,
+          description: 'Not found'
+        }));
       }
-    }
+    });
   }
 
+  /**
+   * Add middleware to router.
+   * @param {function} fn
+   */
   use (fn) {
-    this.useables.push(fn);
-  }
-
-  defaultHeader (name, value) {
-    this.headers[name] = value;
+    this.middleware.push(fn);
   }
 }
 
-Superhero.Router = require('./Router');
+for (const verb of HTTPVerbs) {
+  Superhero.prototype[verb] = function (path, handler) {
+    path = compileURL({ url: path });
+    if (!this.handlers[verb]) this.handlers[verb] = {};
+    this.handlers[verb][path] = { path, handler };
+  };
+}
 
 module.exports = Superhero;
