@@ -33,7 +33,7 @@ class Superhero {
   /**
    * Request listener
    */
-  _requestListener (req, res) {
+  requestListener (req, res) {
     res.setHeader('Content-Type', 'application/json');
     const handlers = this.handlers[req.method.toLowerCase()];
 
