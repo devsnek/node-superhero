@@ -1,29 +1,12 @@
+const http = require('http');
 const Superhero = require('../src');
-const Router = Superhero.Router;
 
-const server = new Superhero();
+const router = new Superhero();
 
-const router = new Router();
-
-server.use((req, res) => {
+router.use((req, res) => {
   console.log(req.path);
 });
 
-router.get('/:x', (req, res) => {
-  res.send('ROOT! ' + req.params.x);
-});
-
-router.get('/params/:x', (req, res) => {
-  console.log('PARAMS', req.params);
-  console.log('BODY', req.body);
-  res.send(req.params.x);
-});
-
-router.post('/post', (req, res) => {
-  console.log(req.body);
-  res.send({'OMG': 'HELP'});
-});
-
-router.applyRoutes(server);
+const server = http.createServer(router.requestListener);
 
 server.listen(3000);
